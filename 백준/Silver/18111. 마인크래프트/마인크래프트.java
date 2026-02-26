@@ -1,10 +1,7 @@
 import java.io.*;
-import java.util.*;
+import java.util.StringTokenizer;
 
 public class Main {
-    static int[] map;
-    static int[] count;
-
     public static void main(String[] args) throws Exception {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine());
@@ -12,47 +9,49 @@ public class Main {
         int N = Integer.parseInt(st.nextToken());
         int M = Integer.parseInt(st.nextToken());
         int B = Integer.parseInt(st.nextToken());
-        int len = N * M;
-        int sum = 0;
-        map = new int[N * M];
+        long sum = 0L;
 
-        count = new int[257];
-        Arrays.fill(count, Integer.MAX_VALUE);
-        int min = 257;
-
-        for(int i = 0; i < N; i++){
+        int[] freq = new int[257];
+        for (int i = 0; i < N; i++) {
             st = new StringTokenizer(br.readLine());
-            for(int j = 0; j < M; j++) {
+            for (int j = 0; j < M; j++) {
                 int val = Integer.parseInt(st.nextToken());
-                map[i * M + j] = val;
-                if(min > val) min = val;
+                freq[val]++;
                 sum += val;
             }
         }
 
-        int max = (B + sum) / len;
-        if (max > 256) max = 256;
-
-        for(int i = min; i <= max; i++) {
-            int upCount = 0;
-            int downCount = 0;
-            for(int j = 0; j < len; j++) {
-                if(map[j] == i) continue;
-                if(map[j] > i) upCount += map[j] - i;
-                else downCount += i - map[j]; 
-            }
-            count[i] = upCount * 2 + downCount;
+        long[] prefCount = new long[257];
+        long[] prefSum = new long[257];
+        prefCount[0] = freq[0];
+        prefSum[0] = (long) freq[0] * 0;
+        for (int h = 1; h <= 256; h++) {
+            prefCount[h] = prefCount[h - 1] + freq[h];
+            prefSum[h] = prefSum[h - 1] + (long) freq[h] * h;
         }
 
-        int time = Integer.MAX_VALUE;
-        int height = 257;
-        for(int i = 256; i >= 0; i--) {
-            if(time > count[i]) {
-                time = count[i];
-                height = i;
+        long bestTime = Long.MAX_VALUE;
+        int bestHeight = 0;
+        long totalCount = prefCount[256];
+
+        for (int h = 0; h <= 256; h++) {
+            long countBelow = (h > 0) ? prefCount[h - 1] : 0L;
+            long sumBelow = (h > 0) ? prefSum[h - 1] : 0L;
+            long needBlocks = (long) h * countBelow - sumBelow;
+
+            long countAbove = totalCount - prefCount[h];
+            long sumAbove = prefSum[256] - prefSum[h];
+            long removeBlocks = sumAbove - (long) h * countAbove; 
+
+            if (removeBlocks + B < needBlocks) continue; 
+
+            long timeNeeded = removeBlocks * 2 + needBlocks;
+            if (timeNeeded < bestTime || (timeNeeded == bestTime && h > bestHeight)) {
+                bestTime = timeNeeded;
+                bestHeight = h;
             }
         }
 
-        System.out.println(time +" "+height);
+        System.out.println(bestTime + " " + bestHeight);
     }
 }
