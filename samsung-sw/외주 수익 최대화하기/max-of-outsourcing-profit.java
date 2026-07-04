@@ -32,13 +32,16 @@ public class Main {
         System.out.println(maxProfit);
     }
 
-    static void backTracking(int idx, int profit){
-        if(idx > N) return;
-        if(profit > maxProfit) maxProfit = profit; 
-        for(int i = idx ; i < N; i++) {
-            if(i + tasks[i].day <= N) {
-                backTracking(i + tasks[i].day, profit + tasks[i].money);
-            }
+    static void backTracking(int idx, int profit) {
+        if (idx >= N) {
+            maxProfit = Math.max(maxProfit, profit);
+            return;
         }
+
+        if (idx + tasks[idx].day <= N) {
+            backTracking(idx + tasks[idx].day, profit + tasks[idx].money);
+        }
+
+        backTracking(idx + 1, profit);
     }
 }
