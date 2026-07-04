@@ -2,46 +2,31 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-    static int maxProfit = 0;
-    static Task[] tasks;
-    static int N;
-
-    static class Task{
-        int day;
-        int money;
-        Task(int day, int money) {
-            this.day = day;
-            this.money = money;
-        }
-    }
-
     public static void main(String[] args) throws Exception {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        N = Integer.parseInt(br.readLine());
-        tasks = new Task[N];
+        int N = Integer.parseInt(br.readLine());
+        int[] day = new int[N];
+        int[] money = new int[N];
+
         for(int i = 0; i < N; i++) {
             // i = 날짜  0 i + day <= N이 성립되어야함 
             StringTokenizer st = new StringTokenizer(br.readLine());
-            int day = Integer.parseInt(st.nextToken());
-            int money = Integer.parseInt(st.nextToken());
-            tasks[i] = new Task(day, money);
+            day[i] = Integer.parseInt(st.nextToken());
+            money[i] = Integer.parseInt(st.nextToken());
+        }
+        int[] dp = new int[N + 1];
+
+        for (int i = 0; i < N; i++) {
+            dp[i + 1] = Math.max(dp[i + 1], dp[i]);
+
+            int next = i + day[i];
+
+            if (next <= N) {
+                dp[next] = Math.max(dp[next], dp[i] + money[i]);
+            }
         }
 
-        backTracking(0,0);
-
-        System.out.println(maxProfit);
+        System.out.println(dp[N]);
     }
 
-    static void backTracking(int idx, int profit) {
-        if (idx >= N) {
-            maxProfit = Math.max(maxProfit, profit);
-            return;
-        }
-
-        if (idx + tasks[idx].day <= N) {
-            backTracking(idx + tasks[idx].day, profit + tasks[idx].money);
-        }
-
-        backTracking(idx + 1, profit);
-    }
 }
